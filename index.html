@@ -1,11 +1,811 @@
-<!DOCTYPE html>
-<html>
+<html><head><base href="http://example.com/">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Humble Hippos Questionnaire - Part 1</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            min-height: 100vh;
+            background: #1a1a1a;
+            color: #e4e4e4;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 700px;
+            width: calc(100% - 20px); /* Account for padding */
+            background: #2d2d2d;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 20px; /* Reduce padding on mobile */
+            margin: 10px;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 1.5em; /* Smaller title on mobile */
+                margin-bottom: 20px;
+            }
+
+            h2 {
+                font-size: 1.2em;
+            }
+
+            input, textarea, select {
+                padding: 10px 14px; /* Slightly smaller input padding */
+                font-size: 14px;
+            }
+
+            button {
+                padding: 12px 24px;
+                font-size: 14px;
+            }
+
+            /* Adjust photo gallery grid for mobile */
+            #photoGallery {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 10px;
+            }
+
+            /* Adjust button group spacing for mobile */
+            .button-group {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .button-group button {
+                width: 100% !important;
+            }
+
+            /* Make radio options more tappable on mobile */
+            .radio-option {
+                padding: 8px 0;
+            }
+
+            .radio-option input[type="radio"] {
+                width: 20px;
+                height: 20px;
+            }
+
+            /* Adjust section animations for mobile */
+            .section {
+                margin-bottom: 20px;
+            }
+        }
+
+        /* Add better touch interaction styles */
+        input[type="radio"] {
+            min-width: 20px;
+            min-height: 20px;
+        }
+
+        .radio-option label {
+            padding: 8px 0;
+            margin-bottom: 0;
+        }
+
+        /* Improve tap targets */
+        .photo-preview .remove-photo {
+            width: 30px;
+            height: 30px;
+            font-size: 18px;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        h1 {
+            color: #ffffff;
+            font-size: 2em;
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #b3b3b3;
+            font-weight: 500;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #404040;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #333333;
+            color: #ffffff;
+            margin-bottom: 15px;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+        }
+
+        .radio-group {
+            margin-bottom: 15px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .radio-option input[type="radio"] {
+            width: auto;
+            margin-right: 10px;
+        }
+
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+        }
+
+        .part2-container, .part3-container, .part4-container {
+            display: none;
+        }
+
+        .success-message {
+            color: #4CAF50;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        #otherMethodContainer,
+        #issuesContainer,
+        #vegIssuesContainer,
+        #phenoContainer {
+            margin-top: -10px;
+            margin-bottom: 15px;
+        }
+
+        .photo-section {
+            background: #333333;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .photo-preview {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .photo-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-preview .remove-photo {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(255, 0, 0, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
 <body>
+    <div class="container">
+        <div id="part1" class="part1-container">
+            <h1>Humble Hippos Questionnaire - Part 1</h1>
+            
+            <form id="questionnaireFormPart1">
+                <div class="section" style="animation-delay: 0.1s">
+                    <h2>1. Tester Information</h2>
+                    <label for="name">1.1 Name</label>
+                    <input type="text" id="name" required>
 
-<h1>My First Heading</h1>
+                    <label for="contact">1.2 Contact Information</label>
+                    <input type="text" id="contact" required>
 
-<p>My first paragraph.</p>
+                    <label>1.3 Testing Experience Level</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="beginner" name="experience" value="Beginner" required>
+                            <label for="beginner">Beginner</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="intermediate" name="experience" value="Intermediate">
+                            <label for="intermediate">Intermediate</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="advanced" name="experience" value="Advanced">
+                            <label for="advanced">Advanced</label>
+                        </div>
+                    </div>
 
+                    <label>1.4 Growing Method</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="indoor" name="growingMethod" value="Indoor" required>
+                            <label for="indoor">Indoor</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="outdoor" name="growingMethod" value="Outdoor">
+                            <label for="outdoor">Outdoor</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="greenhouse" name="growingMethod" value="Greenhouse">
+                            <label for="greenhouse">Greenhouse</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="mixed" name="growingMethod" value="Mixed">
+                            <label for="mixed">Mixed</label>
+                        </div>
+                    </div>
+
+                    <label for="location">1.5 Growing Location (general climate or region)</label>
+                    <input type="text" id="location" required>
+                </div>
+
+                <div class="section" style="animation-delay: 0.2s">
+                    <h2>2. Seed Testing Details</h2>
+                    <label for="strain">2.1 What seed strain(s) are you testing?</label>
+                    <input type="text" id="strain" required>
+
+                    <label>2.2 Seed type</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="feminized" name="seedType" value="Feminized" required>
+                            <label for="feminized">Feminized</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="autoflowering" name="seedType" value="Autoflowering">
+                            <label for="autoflowering">Autoflowering</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="regular" name="seedType" value="Regular">
+                            <label for="regular">Regular</label>
+                        </div>
+                    </div>
+
+                    <label for="totalSeeds">2.3 Total number of seeds received</label>
+                    <input type="number" id="totalSeeds" required min="0">
+
+                    <label for="germinated">2.4 Total number of seeds germinated</label>
+                    <input type="number" id="germinated" required min="0">
+
+                    <label for="germinationRate">2.5 Germination rate (%)</label>
+                    <input type="number" id="germinationRate" required min="0" max="100">
+                </div>
+
+                <div class="section" style="animation-delay: 0.3s">
+                    <button type="submit">Continue to Part 2</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="part2" class="part2-container">
+            <h1>Humble Hippos Questionnaire - Part 2</h1>
+            
+            <form id="questionnaireFormPart2">
+                <div class="section" style="animation-delay: 0.1s">
+                    <h2>3. Additional Information</h2>
+                    <label for="seedSource">3.1 Where did you obtain the seeds?</label>
+                    <input type="text" id="seedSource" required>
+
+                    <label for="storageConditions">3.2 How were the seeds stored?</label>
+                    <input type="text" id="storageConditions" required>
+
+                    <label for="expectedYield">3.3 Expected yield (grams)</label>
+                    <input type="number" id="expectedYield" required min="0">
+
+                    <label for="comments">3.4 Additional comments or notes</label>
+                    <textarea id="comments" rows="4"></textarea>
+                </div>
+
+                <div class="section" style="animation-delay: 0.2s">
+                    <button type="submit">Continue to Part 3</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="part3" class="part3-container" style="display: none;">
+            <h1>Humble Hippos Questionnaire - Part 3</h1>
+            
+            <form id="questionnaireFormPart3">
+                <div class="section" style="animation-delay: 0.1s">
+                    <h2>3. Germination Process</h2>
+                    <label>3.1 What germination method did you use?</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="paperTowel" name="germinationMethod" value="Paper towel method" required>
+                            <label for="paperTowel">Paper towel method</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="directSoil" name="germinationMethod" value="Direct soil planting">
+                            <label for="directSoil">Direct soil planting</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="rockwool" name="germinationMethod" value="Rockwool cubes">
+                            <label for="rockwool">Rockwool cubes</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="other" name="germinationMethod" value="Other">
+                            <label for="other">Other</label>
+                        </div>
+                    </div>
+                    <div id="otherMethodContainer" style="display: none;">
+                        <label for="otherMethod">Please specify other method:</label>
+                        <input type="text" id="otherMethod">
+                    </div>
+
+                    <label for="sproutDays">3.2 How long did it take for seeds to sprout? (days)</label>
+                    <input type="number" id="sproutDays" required min="0">
+
+                    <label>3.3 Did you experience any issues during germination?</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="issuesYes" name="germinationIssues" value="Yes" required>
+                            <label for="issuesYes">Yes</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="issuesNo" name="germinationIssues" value="No">
+                            <label for="issuesNo">No</label>
+                        </div>
+                    </div>
+                    <div id="issuesContainer" style="display: none;">
+                        <label for="issuesSpecify">Please specify issues:</label>
+                        <input type="text" id="issuesSpecify">
+                    </div>
+                </div>
+
+                <div class="section" style="animation-delay: 0.2s">
+                    <h2>4. Growth Observations</h2>
+                    <label>4.1 How would you rate the seedling vigor?</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="poor" name="seedlingVigor" value="Poor" required>
+                            <label for="poor">Poor</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="average" name="seedlingVigor" value="Average">
+                            <label for="average">Average</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="excellent" name="seedlingVigor" value="Excellent">
+                            <label for="excellent">Excellent</label>
+                        </div>
+                    </div>
+
+                    <label>4.2 Were there any noticeable issues during the vegetative stage?</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="vegIssuesYes" name="vegetativeIssues" value="Yes" required>
+                            <label for="vegIssuesYes">Yes</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="vegIssuesNo" name="vegetativeIssues" value="No">
+                            <label for="vegIssuesNo">No</label>
+                        </div>
+                    </div>
+                    <div id="vegIssuesContainer" style="display: none;">
+                        <label for="vegIssuesSpecify">Please specify issues:</label>
+                        <input type="text" id="vegIssuesSpecify">
+                    </div>
+
+                    <label>4.3 Did the plants show consistent phenotypes?</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="phenoYes" name="consistentPhenotypes" value="Yes" required>
+                            <label for="phenoYes">Yes</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="phenoNo" name="consistentPhenotypes" value="No">
+                            <label for="phenoNo">No</label>
+                        </div>
+                    </div>
+                    <div id="phenoContainer" style="display: none;">
+                        <label for="phenoSpecify">Please specify variations:</label>
+                        <input type="text" id="phenoSpecify">
+                    </div>
+                </div>
+
+                <div class="section" style="animation-delay: 0.3s">
+                    <button type="submit">Continue to Part 4</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="part4" class="part4-container" style="display: none;">
+            <h1>Humble Hippos Questionnaire - Part 4</h1>
+            
+            <form id="questionnaireFormPart4">
+                <div class="section" style="animation-delay: 0.1s">
+                    <h2>5. Photo Documentation</h2>
+                    
+                    <div class="photo-section">
+                        <label>5.1 Upload or Take Photos</label>
+                        
+                        <div class="camera-section">
+                            <video id="camera" style="display: none; width: 100%; border-radius: 12px; margin-bottom: 15px;"></video>
+                            <canvas id="photoCanvas" style="display: none; width: 100%; border-radius: 12px; margin-bottom: 15px;"></canvas>
+                        </div>
+
+                        <div class="button-group" style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <button type="button" id="startCamera" style="width: auto;">Take Photo</button>
+                            <button type="button" id="capturePhoto" style="width: auto; display: none;">Capture</button>
+                            <input type="file" id="photoUpload" accept="image/*" multiple style="display: none;">
+                            <button type="button" id="uploadPhoto" style="width: auto;">Upload Photos</button>
+                        </div>
+
+                        <div id="photoGallery" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin-top: 20px;">
+                        </div>
+                    </div>
+
+                    <label for="photoNotes">5.2 Photo Notes/Description</label>
+                    <textarea id="photoNotes" rows="4" placeholder="Add any notes about the photos..."></textarea>
+                </div>
+
+                <div class="section" style="animation-delay: 0.2s">
+                    <button type="submit">Submit Final Questionnaire</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const formPart1 = document.getElementById('questionnaireFormPart1');
+        const formPart2 = document.getElementById('questionnaireFormPart2');
+        const formPart3 = document.getElementById('questionnaireFormPart3');
+        const formPart4 = document.getElementById('questionnaireFormPart4');
+        const part1Container = document.getElementById('part1');
+        const part2Container = document.getElementById('part2');
+        const part3Container = document.getElementById('part3');
+        const part4Container = document.getElementById('part4');
+        const webhookUrl = 'https://discord.com/api/webhooks/1313387714061799516/Gjctz6gle7dCaQ011e6r7nbtIvDkBgUd6t1IOHLo6wan_OaZ626J4AI7b0OrIPxKdnYZ';
+
+        formPart1.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formDataPart1 = {
+                name: document.getElementById('name').value,
+                contact: document.getElementById('contact').value,
+                experience: document.querySelector('input[name="experience"]:checked').value,
+                growingMethod: document.querySelector('input[name="growingMethod"]:checked').value,
+                location: document.getElementById('location').value,
+                strain: document.getElementById('strain').value,
+                seedType: document.querySelector('input[name="seedType"]:checked').value,
+                totalSeeds: document.getElementById('totalSeeds').value,
+                germinated: document.getElementById('germinated').value,
+                germinationRate: document.getElementById('germinationRate').value
+            };
+
+            const message = {
+                content: 'New Humble Hippos Questionnaire Part 1 Response!',
+                embeds: [{
+                    title: 'Questionnaire Response - Part 1',
+                    fields: Object.entries(formDataPart1).map(([key, value]) => ({
+                        name: key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1'),
+                        value: value || 'Not specified'
+                    })),
+                    color: 5763719,
+                    timestamp: new Date().toISOString()
+                }]
+            };
+
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(message)
+            })
+            .then(response => {
+                if (response.ok) {
+                    part1Container.style.display = 'none';
+                    part2Container.style.display = 'block';
+                } else {
+                    throw new Error('Failed to send message');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to submit response. Please try again.');
+            });
+        });
+
+        formPart2.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formDataPart2 = {
+                seedSource: document.getElementById('seedSource').value,
+                storageConditions: document.getElementById('storageConditions').value,
+                expectedYield: document.getElementById('expectedYield').value,
+                comments: document.getElementById('comments').value
+            };
+
+            const message = {
+                content: 'New Humble Hippos Questionnaire Part 2 Response!',
+                embeds: [{
+                    title: 'Questionnaire Response - Part 2',
+                    fields: Object.entries(formDataPart2).map(([key, value]) => ({
+                        name: key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1'),
+                        value: value || 'Not specified'
+                    })),
+                    color: 5763719,
+                    timestamp: new Date().toISOString()
+                }]
+            };
+
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(message)
+            })
+            .then(response => {
+                if (response.ok) {
+                    part2Container.style.display = 'none';
+                    part3Container.style.display = 'block';
+                } else {
+                    throw new Error('Failed to send message');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to submit response. Please try again.');
+            });
+        });
+
+        formPart3.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formDataPart3 = {
+                germinationMethod: document.querySelector('input[name="germinationMethod"]:checked').value,
+                otherMethod: document.getElementById('otherMethod').value,
+                sproutDays: document.getElementById('sproutDays').value,
+                germinationIssues: document.querySelector('input[name="germinationIssues"]:checked').value,
+                issuesSpecify: document.getElementById('issuesSpecify').value,
+                seedlingVigor: document.querySelector('input[name="seedlingVigor"]:checked').value,
+                vegetativeIssues: document.querySelector('input[name="vegetativeIssues"]:checked').value,
+                vegIssuesSpecify: document.getElementById('vegIssuesSpecify').value,
+                consistentPhenotypes: document.querySelector('input[name="consistentPhenotypes"]:checked').value,
+                phenoSpecify: document.getElementById('phenoSpecify').value
+            };
+
+            const message = {
+                content: 'New Humble Hippos Questionnaire Part 3 Response!',
+                embeds: [{
+                    title: 'Questionnaire Response - Part 3',
+                    fields: Object.entries(formDataPart3).map(([key, value]) => ({
+                        name: key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1'),
+                        value: value || 'Not specified'
+                    })),
+                    color: 5763719,
+                    timestamp: new Date().toISOString()
+                }]
+            };
+
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(message)
+            })
+            .then(response => {
+                if (response.ok) {
+                    part3Container.style.display = 'none';
+                    part4Container.style.display = 'block';
+                } else {
+                    throw new Error('Failed to send message');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to submit response. Please try again.');
+            });
+        });
+
+        // Add event listeners for showing/hiding additional input fields
+        document.getElementById('other').addEventListener('change', function() {
+            document.getElementById('otherMethodContainer').style.display = this.checked ? 'block' : 'none';
+        });
+
+        document.getElementById('issuesYes').addEventListener('change', function() {
+            document.getElementById('issuesContainer').style.display = this.checked ? 'block' : 'none';
+        });
+
+        document.getElementById('vegIssuesYes').addEventListener('change', function() {
+            document.getElementById('vegIssuesContainer').style.display = this.checked ? 'block' : 'none';
+        });
+
+        document.getElementById('phenoNo').addEventListener('change', function() {
+            document.getElementById('phenoContainer').style.display = this.checked ? 'block' : 'none';
+        });
+
+        // Add Part 4 functionality:
+        const photos = [];
+        const startCamera = document.getElementById('startCamera');
+        const capturePhoto = document.getElementById('capturePhoto');
+        const camera = document.getElementById('camera');
+        const photoCanvas = document.getElementById('photoCanvas');
+        const uploadPhoto = document.getElementById('uploadPhoto');
+        const photoUpload = document.getElementById('photoUpload');
+        const photoGallery = document.getElementById('photoGallery');
+
+        startCamera.addEventListener('click', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                camera.srcObject = stream;
+                camera.style.display = 'block';
+                capturePhoto.style.display = 'inline-block';
+                startCamera.textContent = 'Cancel';
+            } catch (err) {
+                console.error('Error accessing camera:', err);
+                alert('Unable to access camera');
+            }
+        });
+
+        capturePhoto.addEventListener('click', () => {
+            photoCanvas.width = camera.videoWidth;
+            photoCanvas.height = camera.videoHeight;
+            photoCanvas.getContext('2d').drawImage(camera, 0, 0);
+            
+            const photoData = photoCanvas.toDataURL('image/jpeg');
+            addPhotoToGallery(photoData);
+            
+            // Stop camera
+            camera.srcObject.getTracks().forEach(track => track.stop());
+            camera.style.display = 'none';
+            capturePhoto.style.display = 'none';
+            startCamera.textContent = 'Take Photo';
+        });
+
+        uploadPhoto.addEventListener('click', () => {
+            photoUpload.click();
+        });
+
+        photoUpload.addEventListener('change', (e) => {
+            const files = e.target.files;
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => addPhotoToGallery(e.target.result);
+                reader.readAsDataURL(file);
+            });
+        });
+
+        function addPhotoToGallery(photoData) {
+            const photoContainer = document.createElement('div');
+            photoContainer.className = 'photo-preview';
+            
+            const img = document.createElement('img');
+            img.src = photoData;
+            
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-photo';
+            removeBtn.innerHTML = '×';
+            removeBtn.onclick = () => photoContainer.remove();
+            
+            photoContainer.appendChild(img);
+            photoContainer.appendChild(removeBtn);
+            photoGallery.appendChild(photoContainer);
+            
+            photos.push(photoData);
+        }
+
+        formPart4.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formDataPart4 = {
+                photoNotes: document.getElementById('photoNotes').value,
+                numberOfPhotos: photos.length
+            };
+
+            const message = {
+                content: 'New Humble Hippos Questionnaire Part 4 Response!',
+                embeds: [{
+                    title: 'Questionnaire Response - Part 4',
+                    fields: Object.entries(formDataPart4).map(([key, value]) => ({
+                        name: key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1'),
+                        value: value || 'Not specified'
+                    })),
+                    color: 5763719,
+                    timestamp: new Date().toISOString()
+                }]
+            };
+
+            // First send the form data
+            await fetch(webhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(message)
+            });
+
+            // Then send each photo in separate messages
+            for (let i = 0; i < photos.length; i++) {
+                await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        content: `Photo ${i + 1} for the latest submission:`,
+                        embeds: [{
+                            image: {
+                                url: photos[i]
+                            }
+                        }]
+                    })
+                });
+            }
+
+            alert('Thank you for completing the full questionnaire!');
+            window.location.reload();
+        });
+    </script>
 </body>
 </html>
-
